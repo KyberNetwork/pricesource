@@ -44,7 +44,7 @@ func NewCoingeckoPriceSource(
 	}
 }
 
-func (s *coingeckoPriceSource) ListPrices(_ context.Context, chainId valueobject.ChainID, keys []string) (map[string]float64, error) {
+func (s *coingeckoPriceSource) ListPrices(ctx context.Context, chainId valueobject.ChainID, keys []string) (map[string]float64, error) {
 	chain, ok := ChainIdCoingeckoPlatformMap[valueobject.ChainID(chainId)]
 	if !ok {
 		return nil, errors.New("coingecko does not support this chain")
@@ -58,7 +58,7 @@ func (s *coingeckoPriceSource) ListPrices(_ context.Context, chainId valueobject
 
 	var response map[string]PriceResponse
 
-	resp, err := s.client.R().SetResult(&response).Get(url)
+	resp, err := s.client.R().SetContext(ctx).SetResult(&response).Get(url)
 	if err != nil {
 		logger.Errorf("failed to call Coingecko - simple price api, err: %v", err)
 		return nil, err
@@ -80,12 +80,12 @@ func (s *coingeckoPriceSource) ListPrices(_ context.Context, chainId valueobject
 	return result, nil
 }
 
-func (s *coingeckoPriceSource) ListCoins(_ context.Context) ([]CoingeckoCoin, error) {
+func (s *coingeckoPriceSource) ListCoins(ctx context.Context) ([]CoingeckoCoin, error) {
 	url := "/coins/list?include_platform=true"
 
 	var response []CoingeckoCoin
 
-	_, err := s.client.R().SetResult(&response).Get(url)
+	_, err := s.client.R().SetContext(ctx).SetResult(&response).Get(url)
 	if err != nil {
 		logger.Errorf("failed to call Coingecko - list coins api, err: %v", err)
 		return nil, err
